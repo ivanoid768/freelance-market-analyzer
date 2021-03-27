@@ -1,0 +1,27 @@
+version: '3.5'
+
+services:
+  postgres:
+    container_name: fma-postgres
+    image: mongo:4.4
+    restart: always
+    ports:
+      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 7e39a446Q47dN4PN
+
+  parser:
+    container_name: fma-parser
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    ports:
+      - 4000:4000
+    depends_on:
+      - postgres
+
+networks:
+  default:
+    name: fma-network
