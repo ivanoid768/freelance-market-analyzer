@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es2018",
+        "lib": ["ES2018", "ESNext.AsyncIterable"],
+        "module": "commonjs",
+        "rootDir": "./src",
+        "outDir": "./build",
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
