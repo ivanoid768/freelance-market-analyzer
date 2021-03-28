@@ -1,2 +1,8 @@
 import "reflect-metadata";
-import {} from 'apollo-server-express';
+import { connectDB } from "./index.db";
+
+async function main() {
+    await connectDB()
+}
+
+main().catch(e => console.log(e.message))
