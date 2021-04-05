@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, getRepository } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { Filter } from "./Filter";
 
 export enum UserRole {
     TRIAL = 'TRIAL',
@@ -33,4 +34,7 @@ export class User {
         nullable: true,
     })
     token?: string;
+
+    @OneToMany(() => Filter, filter => filter.user)
+    filters: Filter[];
 }
