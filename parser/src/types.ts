@@ -1,5 +1,7 @@
 export interface ICategory {
-
+    name: string;
+    path: string;
+    url: string;
 }
 
 export interface ITask {
@@ -7,6 +9,6 @@ export interface ITask {
 }
 
 export interface ISourceAPI {
-    getCategories(): ICategory[];
-    getTasks(): ITask[];
+    getCategories(): Promise<ICategory[]>;
+    getTasks(): Promise<ITask[]>;
 }
