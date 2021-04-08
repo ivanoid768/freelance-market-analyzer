@@ -2,6 +2,8 @@ export interface ICategory {
     name: string;
     path: string;
     url: string;
+    extId: string | string[];
+    root?: string;
 }
 
 export interface ITask {
