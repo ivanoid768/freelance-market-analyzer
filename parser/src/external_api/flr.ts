@@ -14,6 +14,39 @@ interface ICategoryAPIResp {
     results: ICtg[]
 }
 
+interface IAPITask {
+    project_desc: string;
+    project_id: number;
+    project_name: string;
+    seo_url: string;
+    bid_count: number;
+    bid_avg: string | false;
+    budget_range: string;
+    maxbudget: string;
+    minbudget: string;
+    time_left: string;
+    NDA: boolean;
+    featured: boolean;
+    fulltime: boolean;
+    guaranteed: boolean;
+    has_upgrades: boolean;
+    highlight: boolean;
+    is_contest: boolean;
+    local: boolean;
+    payment_verified: string;
+    sealed: boolean;
+    top: boolean;
+    urgent: boolean;
+}
+
+interface ITaskAPIResp {
+    aaData: IAPITask[];
+    iTotalDisplayRecords: number;
+    iTotalRecords: number;
+    sEcho: number;
+    tagData: any[];
+}
+
 class FlrAPI implements ISourceAPI {
     private BASE_URL = config.SOURCE_01_BASE_URL;
 
@@ -39,13 +72,13 @@ class FlrAPI implements ISourceAPI {
         })
 
         let ctgAPIResp = await this.requestCategoriesViaAPI();
-        
+
         let ctgs = ctgAPIResp.data.results;
         let ctgsMap = new Map<string, ICtg>();
         ctgs.forEach(skill => {
             ctgsMap.set(skill.seo_url + '/', skill);
         })
-        
+
         let categories: ICategory[] = [];
 
         rootCategories.map(rootCategory => {
@@ -62,33 +95,66 @@ class FlrAPI implements ISourceAPI {
                 }
 
                 let extId = ctgsMap.get(url)?.job_id;
-                if(!extId){
-                    extId = url;                    
+                if (!extId) {
+                    extId = url;
                 }
-                
+
                 rootCategory.extId.push(extId);
 
                 return {
                     name,
                     path: rootCategory.path + path,
                     url,
-                    extId, 
+                    extId,
                     root: rootCategory.path,
                 }
             })
 
             categories.push(...ctgs);
         })
-        
+
         categories.push(...rootCategories);
 
         return categories;
     }
 
-    public getTasks(): Promise<ITask[]> {
+    public async getTasks(categoryIds: string[], page: number = 1, perPage: number = 50): Promise<ITask[]> {
+        let taskAPIResp = await this.requestTasksViaAPI(categoryIds, page, perPage);
 
+        let respTasks = taskAPIResp.data.aaData;
 
-        throw new Error("Method not implemented.");
+        let tasks: ITask[] = respTasks.map(rTask => {
+            let priceMin = parseFloat(rTask.minbudget.replace('$', ''));
+            let priceMax = parseFloat(rTask.maxbudget.replace('$', ''));
+            let price = ((priceMax + priceMin) / 2);
+
+            if (rTask.bid_avg) {
+                let priceBidAvg = parseFloat(rTask.bid_avg.replace('$', ''));
+                price = priceBidAvg <= priceMax ? priceBidAvg : priceMax;
+            }
+
+            let paymentType: 'hourly' | 'fixed' = 'fixed';
+
+            if (rTask?.budget_range?.indexOf('/ hr') !== -1) {
+                paymentType = 'hourly';
+            }
+
+            let timeLeft = rTask.time_left;
+
+            return {
+                extId: rTask.project_id.toString(),
+                name: rTask.project_name,
+                url: this.BASE_URL + rTask.seo_url,
+                description: rTask.project_desc,
+                bidCount: rTask.bid_count,
+                priceType: 'fixed',
+                paymentType,
+                price: price,
+                timeLeft,
+            }
+        })
+
+        return tasks;
     }
 
     private async requestCategories() {
@@ -101,6 +167,40 @@ class FlrAPI implements ISourceAPI {
 
     private async requestCategoriesViaAPI() {
         return axios.get<ICategoryAPIResp>(`${this.BASE_URL}/ajax/search/allSkills.php`);
+    }
+
+    private async requestTasksViaAPI(categoryExtIds: string[], page: number = 1, perPage: number = 50) {
+        let offset = (page - 1) * perPage;
+
+        return axios.get<ITaskAPIResp>(`${this.BASE_URL}/ajax/table/project_contest_datatable.php`, {
+            headers: {
+                accept: 'application/json, text/javascript, */*; q=0.01',
+            },
+            params: {
+                tag: null,
+                type: false,
+                budget_min: false,
+                budget_max: false,
+                contest_budget_min: false,
+                contest_budget_max: false,
+                hourlyrate_min: false,
+                hourlyrate_max: false,
+                hourlyProjectDuration: false,
+                skills_chosen: categoryExtIds.length > 0 ? categoryExtIds.join(',') : false,
+                languages: false,
+                status: 'open',
+                vicinity: false,
+                countries: false,
+                lat: false,
+                lon: false,
+                iDisplayStart: offset,
+                iDisplayLength: perPage,
+                iSortingCols: 1,
+                iSortCol_0: 6,
+                sSortDir_0: 'desc',
+                format_version: 3,
+            }
+        });
     }
 }
 

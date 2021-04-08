@@ -7,10 +7,18 @@ export interface ICategory {
 }
 
 export interface ITask {
-
+    extId: string;
+    name: string;
+    url: string;
+    description: string;
+    price: number;
+    bidCount: number;
+    priceType: 'deal' | 'range' | 'fixed';
+    paymentType: 'hourly' | 'fixed';
+    timeLeft: string | Date;
 }
 
 export interface ISourceAPI {
     getCategories(): Promise<ICategory[]>;
-    getTasks(): Promise<ITask[]>;
+    getTasks(categoryIds: string[], page: number, perPage: number): Promise<ITask[]>;
 }
