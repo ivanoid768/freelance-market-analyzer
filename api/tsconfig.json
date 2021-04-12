@@ -3,13 +3,21 @@
         "target": "es2018",
         "lib": ["ES2018", "ESNext.AsyncIterable"],
         "module": "commonjs",
-        "rootDir": "./src",
-        "outDir": "./build",
+        "rootDirs": ["./src", "../shared"],
+        "outDir": "../build/api",
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+    ],
+    "exclude": ["node_modules", "build"],
+    "references": [
+        { 
+            "path": "../shared",
+            // add 'prepend' if you want to include the referenced project in your output file
+            "prepend": false, 
+        }
     ]
 }

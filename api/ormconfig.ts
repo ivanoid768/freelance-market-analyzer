@@ -5,6 +5,7 @@ export default {
     url: config.POSTGRES_DB_CONNECT_URI,
     entities: [
         'src/entity/**/*.ts',
+        '../shared/src/entity/**/*.ts'
     ],
     synchronize: true,
     logging: false,
