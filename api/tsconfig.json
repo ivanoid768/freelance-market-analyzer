@@ -1,23 +1,20 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "target": "es2018",
         "lib": ["ES2018", "ESNext.AsyncIterable"],
         "module": "commonjs",
-        "rootDirs": ["./src", "../shared"],
-        "outDir": "../build/api",
+        "outDir": "./build",
+        "moduleResolution": "Node",
         "esModuleInterop": true,
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        "paths": {
+			"shared/*": ["../shared/*"]
+		}
     },
     "include": [
         "src/**/*",
     ],
-    "exclude": ["node_modules", "build"],
-    "references": [
-        { 
-            "path": "../shared",
-            // add 'prepend' if you want to include the referenced project in your output file
-            "prepend": false, 
-        }
-    ]
+    "exclude": ["node_modules", "build"]
 }

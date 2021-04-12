@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable } from "typeorm";
-import { SourceCategory } from "../../../shared";
+import { SourceCategory } from "../../../shared/src/entity/SourceCategory";
 import { User } from "./User";
 
 @Entity()
