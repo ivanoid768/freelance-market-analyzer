@@ -7,7 +7,7 @@
     "start": "nodemon -r dotenv/config ./src/index.ts",
     "script": "ts-node -r dotenv/config",
     "build": "tsc",
-    "launch": "node -r dotenv/config ./build/api/src/index.js"
+    "launch": "node -r ts-node/register/transpile-only -r dotenv/config ./build/api/src/index.js"
   },
   "dependencies": {
     "apollo-server-express": "^2.22.1",
