@@ -2,6 +2,8 @@ import { getRepository } from "typeorm";
 
 import { flrAPI } from "../external_api/flr";
 import { SourceCategory } from "shared/src/entity/SourceCategory";
+import { PaymentType, PriceType, Task } from "shared/src/entity/Task";
+import { config } from "src/config";
 
 const sourceId: number = 1;
 const sourceName: string = 'freelancer';
@@ -61,9 +63,68 @@ export async function getAndSaveCategories() {
         .insert()
         .into(SourceCategory)
         .values(categories)
-        .onConflict(`("extId") DO UPDATE SET "path" = excluded."path", "searchText" = excluded."searchText", "rootCategoryId" = excluded."rootCategoryId"`)
+        .onConflict(`("extId") DO UPDATE SET "path" = excluded."path", "searchText" = excluded."searchText",`
+            + ` "rootCategoryId" = excluded."rootCategoryId"`)
         .returning(['path', 'rootCategoryId'])
         .execute();
 
     // console.log(insertedCategories.generatedMaps.slice(0, 10));
+}
+
+export async function getAndSaveTasks(categoryIds: number[]) {
+    const page_count = config.FLR_PAGE_COUNT;
+
+    const categoryRepository = getRepository(SourceCategory);
+    const categories = await categoryRepository.findByIds(categoryIds, {select: ["id", "extId"]});
+
+    const taskRepository = getRepository(Task);
+
+    for (const category of categories) {
+        for (let pageIdx = 1; pageIdx <= page_count; pageIdx++) {
+            let parsedTasks = await flrAPI.getTasks([category.extId], pageIdx);
+
+            if(!parsedTasks.length){
+                break;
+            }
+            
+            let taskToInsert = parsedTasks.map(parsedTask => {
+                let task = new Task();
+                task.sourceId = sourceId;
+                task.sourceName = sourceName;
+
+                task.extId = parsedTask.extId;
+
+                task.name = parsedTask.name;
+                task.description = parsedTask.description;
+                task.categoryId = category.id;
+
+                task.bidCount = parsedTask.bidCount;
+                task.price = parsedTask.price;
+                task.priceType = parsedTask.priceType === "deal" ? PriceType.DEAL : PriceType.ABOUT;
+                task.paymentType = parsedTask.paymentType === 'hourly' ? PaymentType.HOURLY : PaymentType.FIXED;
+
+                task.url = parsedTask.url;
+                task.searchText = `${parsedTask.name} ${parsedTask.description} ${parsedTask.url} ${sourceName}`;
+
+                return task;
+            })
+            
+            let insertedTasks = await taskRepository.createQueryBuilder()
+                .insert()
+                .into(Task)
+                .values(taskToInsert)
+                .onConflict(`("extId") DO UPDATE SET "name" = excluded."name", "description" = excluded."description",`
+                    + ` "categoryId" = excluded."categoryId",`
+                    + ` "bidCount" = excluded."bidCount",`
+                    + ` "price" = excluded."price",`
+                    + ` "priceType" = excluded."priceType",`
+                    + ` "paymentType" = excluded."paymentType",`
+                    + ` "url" = excluded."url",`
+                    + ` "searchText" = excluded."searchText"`)
+                .returning(['name', 'categoryId'])
+                .execute();
+
+            // console.log(insertedTasks.generatedMaps[0], insertedTasks.generatedMaps.length);
+        }
+    }
 }

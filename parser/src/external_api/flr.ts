@@ -127,7 +127,7 @@ class FlrAPI implements ISourceAPI {
         let taskAPIResp = await this.requestTasksViaAPI(categoryIds, page, perPage);
 
         let respTasks = taskAPIResp.data.aaData;
-
+        
         let tasks: ITask[] = respTasks.map(rTask => {
             let priceMin = parseFloat(rTask.minbudget.replace('$', ''));
             let priceMax = parseFloat(rTask.maxbudget.replace('$', ''));

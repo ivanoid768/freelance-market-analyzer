@@ -12,12 +12,23 @@ export enum DifficultyLevel {
     HIGH = 'HIGH',
 }
 
+export enum PaymentType {
+    HOURLY = 0,
+    FIXED = 1,
+}
+
 @Entity()
 export class Task {
     @PrimaryGeneratedColumn({
         type: 'integer'
     })
     id!: number;
+
+    @Column({
+        type: 'varchar',
+        unique: true,
+    })
+    extId: string;
 
     @Column({
         length: 100,
@@ -58,10 +69,10 @@ export class Task {
         nullable: true,
         transformer: {
             to: (value: string[]) => {
-                return value.join(',')
+                return value && value.join(',')
             },
             from: (value: string) => {
-                return value.split(',')
+                return value && value.split(',')
             }
         }
     })
@@ -85,6 +96,13 @@ export class Task {
         nullable: true,
     })
     price: number;
+
+    @Column({
+        type: 'enum',
+        nullable: true,
+        enum: [PaymentType.HOURLY, PaymentType.FIXED]
+    })
+    paymentType: number;
 
     @Column({
         type: 'enum',
