@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon -r dotenv/config ./src/index.ts",
-    "script": "ts-node -r dotenv/config",
+    "script": "ts-node -r dotenv/config -r tsconfig-paths/register",
     "build": "tsc"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "@types/node-cron": "^2.0.3",
     "nodemon": "^2.0.7",
     "ts-node": "^9.1.1",
+    "tsconfig-paths": "^3.9.0",
     "typescript": "^4.1.3"
   }
 }

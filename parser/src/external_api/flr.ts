@@ -91,6 +91,11 @@ class FlrAPI implements ISourceAPI {
 
                 if (!name) {
                     name = url.match(/contest\/([^/]+)\//i)?.[1];
+
+                    if(name){
+                        path = `/${name}/contest`; //TODO: replace 'dot-net-core' with '.net-core'
+                    }
+
                     name = `${name} contest`;
                 }
 

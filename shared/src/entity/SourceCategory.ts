@@ -22,8 +22,15 @@ export class SourceCategory {
     @Index()
     @Column({
         type: 'integer',
+        nullable: true,
     })
     rootCategoryId: number;
+
+    @Column({
+        type: 'varchar',
+        unique: true,
+    })
+    extId: string;
     
     @Column({
         type: 'varchar',

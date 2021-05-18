@@ -1,13 +1,17 @@
 {
     "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
         "target": "es2018",
         "lib": ["ES2018", "ESNext.AsyncIterable"],
         "module": "commonjs",
-        "rootDir": "./src",
         "outDir": "./build",
         "esModuleInterop": true,
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        "paths": {
+			"shared/*": ["../shared/*"]
+		}
     },
     "include": [
         "src/**/*"
