@@ -2,12 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { ObjectType, Field, ID } from "type-graphql";
 
 import { Filter } from "./Filter";
-
-export enum UserRole {
-    TRIAL = 'TRIAL',
-    STANDARD = 'STANDARD',
-    PREMIUM = 'PREMIUM'
-}
+import { UserRole } from "../api/types.api";
 
 @Entity()
 @ObjectType()

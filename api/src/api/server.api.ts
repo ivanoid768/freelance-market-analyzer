@@ -13,6 +13,11 @@ import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
 import { buildSchemaSync, registerEnumType } from 'type-graphql';
 import { UserResolver } from './user.api';
+import { customAuthChecker } from './auth.api';
+import { User } from '../entity/User';
+import { getRepository } from 'typeorm';
+import { Admin } from '../entity/Admin';
+import { AdminResolver } from './admin.api';
 
 // registerEnumType(ProductSources, {
 // 	name: 'ProductSources', // this one is mandatory
@@ -20,8 +25,10 @@ import { UserResolver } from './user.api';
 
 const typeSchema = buildSchemaSync({
     resolvers: [
-        UserResolver
+        UserResolver,
+        AdminResolver
     ],
+    authChecker: customAuthChecker,
     dateScalarMode: 'timestamp',
 });
 
@@ -64,23 +71,25 @@ SchemaDirectiveVisitor.visitSchemaDirectives(typeSchema, {
 // };
 
 export const createApolloGraphQLServer = (forTest = false) => {
-    // const fullSchema = mergeSchemas({schemas: [typeSchema, schema]});
-
     return new ApolloServer({
         schema: typeSchema,
-        // context: async ({req}) => {
-        // 	const token = req.headers.authorization;
+        context: async ({ req }) => {
+            const token = req.headers.authorization;
 
-        // 	if (token) {
-        // 		const session = await Session.findWithUser(token);
+            if (token) {
+                const users = await getRepository(User).find({ where: { token: token } });
+                if (users[0]) {
+                    return { user: users[0] };
+                }
 
-        // 		if (session?.user) {
-        // 			return {user: session.user};
-        // 		}
-        // 	}
+                const admins = await getRepository(Admin).find({ where: { token: token } });
+                if (admins[0]) {
+                    return { user: admins[0] };
+                }
+            }
 
-        // 	return {};
-        // },
+            return {};
+        },
         playground: forTest ? undefined : { tabs: [{ endpoint: '/graphql' }] },
     });
 };
