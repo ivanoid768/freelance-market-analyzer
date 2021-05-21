@@ -10,7 +10,10 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "paths": {
-			"shared/*": ["../shared/*"]
+			"shared/*": ["../shared/*"],
+            "graphql": ["node_modules/graphql"],
+            "type-graphql": ["node_modules/type-graphql"],
+            "class-validator": ["node_modules/class-validator"]
 		}
     },
     "include": [

@@ -1,8 +1,11 @@
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import { Entity, Column, PrimaryGeneratedColumn, Index } from "typeorm";
 
 @Entity()
 @Index(['sourceId', 'rootCategoryId'])
+@ObjectType()
 export class SourceCategory {
+    @Field(() => ID)
     @PrimaryGeneratedColumn({
         type: 'integer'
     })
@@ -19,6 +22,7 @@ export class SourceCategory {
     })
     sourceName: string;
 
+    @Field(() => Int)
     @Index()
     @Column({
         type: 'integer',
@@ -32,6 +36,7 @@ export class SourceCategory {
     })
     extId: string;
     
+    @Field(() => String)
     @Column({
         type: 'varchar',
     })

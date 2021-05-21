@@ -18,6 +18,7 @@ import { User } from '../entity/User';
 import { getRepository } from 'typeorm';
 import { Admin } from '../entity/Admin';
 import { AdminResolver } from './admin.api';
+import { CategoryResolver } from './category.api';
 
 // registerEnumType(ProductSources, {
 // 	name: 'ProductSources', // this one is mandatory
@@ -26,7 +27,8 @@ import { AdminResolver } from './admin.api';
 const typeSchema = buildSchemaSync({
     resolvers: [
         UserResolver,
-        AdminResolver
+        AdminResolver,
+        CategoryResolver
     ],
     authChecker: customAuthChecker,
     dateScalarMode: 'timestamp',

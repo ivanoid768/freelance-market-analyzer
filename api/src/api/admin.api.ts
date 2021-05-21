@@ -22,7 +22,7 @@ export class AdminResolver {
     }
 
     @Mutation(() => Admin)
-    async login(@Args() loginData: LoginInput) {
+    async loginAdmin(@Args() loginData: LoginInput) {
         let admin = await this.rep.findOne({ where: { login: loginData.login } });
         if(!admin){
             throw new Error('invalid_login');
