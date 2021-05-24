@@ -20,6 +20,7 @@ import { Admin } from '../entity/Admin';
 import { AdminResolver } from './admin.api';
 import { CategoryResolver } from './category.api';
 import { TagResolver } from './tag.resolver';
+import { FilterResolver } from './filter.resolver';
 
 // registerEnumType(ProductSources, {
 // 	name: 'ProductSources', // this one is mandatory
@@ -30,7 +31,8 @@ const typeSchema = buildSchemaSync({
         UserResolver,
         AdminResolver,
         CategoryResolver,
-        TagResolver
+        TagResolver,
+        FilterResolver
     ],
     authChecker: customAuthChecker,
     dateScalarMode: 'timestamp',

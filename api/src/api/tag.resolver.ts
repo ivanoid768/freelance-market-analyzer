@@ -39,11 +39,12 @@ export class TagResolver {
             .getMany();
 
         return {
-            categories: tags,
+            tags: tags,
             total: tags.length
         }
     }
 
+    @Authorized(Role.UserRole.TRIAL)
     @Mutation(() => Tag)
     async createTag(@Args() input: TagInput) {
         let newTag = new Tag();
@@ -54,6 +55,7 @@ export class TagResolver {
         return newTag;
     }
 
+    @Authorized(Role.UserRole.TRIAL)
     @Mutation(() => Tag)
     async deleteTag(@Arg('id') id: number) {
         let tag = await this.rep.findOneOrFail(id);
