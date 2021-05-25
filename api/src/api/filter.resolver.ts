@@ -41,7 +41,7 @@ export class FilterResolver {
     @Authorized(Role.UserRole.TRIAL)
     @Query(() => FiltersResp)
     async filters(@Ctx() context: IContext) {
-        let filters = await this.rep.find({ where: { user: context.user.id } });
+        let filters = await this.rep.find({ where: { user: context.user.id }, relations: ['categories'] });
 
         return {
             filters: filters,
@@ -75,11 +75,16 @@ export class FilterResolver {
 
     @Authorized(Role.UserRole.TRIAL)
     @Mutation(() => Filter)
-    async deleteFilter(@Arg('id') id: number) {
-        let filter = await this.rep.findOneOrFail(id);
+    async deleteFilter(@Arg('id', () => Int) id: number) {
+        let filter = await this.rep.findOneOrFail(id, { relations: ['categories'] });
+
+        let filterId = filter.id;
 
         filter = await this.rep.remove(filter);
 
-        return filter;
+        return {
+            ...filter,
+            id: filterId
+        };
     }
 }
