@@ -25,6 +25,12 @@ class TasksResp {
 
     @Field(() => Int)
     total: number;
+
+    @Field(() => Int)
+    page?: number;
+
+    @Field(() => Int)
+    perPage?: number;
 }
 
 @Resolver()
@@ -40,7 +46,7 @@ export class TaskResolver {
     @Authorized(Role.UserRole.TRIAL)
     @Query(() => TasksResp)
     async tags(@Args() args: TasksArgs, @Ctx() context: IContext): Promise<TasksResp> {
-        let findOpts: FindManyOptions<Task> = {};
+        let qb = this.rep.createQueryBuilder();
 
         if (args.filterId) {
             let filter = await this.filterRep.findOne({ where: { user: context.user.id, id: args.filterId } });
@@ -50,25 +56,34 @@ export class TaskResolver {
 
             let ctgIds = filter.categories.map(ctg => ctg.id);
 
-            findOpts.where = {
-                categoryId: In(ctgIds),
-                searchText: [ILike(`%${filter.positiveKeywords}%`), Not(ILike(`%${filter.negativeKeywords}%`))],
-            };
+            qb.where("Task.categoryId IN (:...ctgIds)", { ctgIds: ctgIds })
+
+            qb.andWhere(
+                `to_tsvector('simple', Task.searchText) @@ to_tsquery('simple', :query)`,
+                { query: `${filter.positiveKeywords.join(' & ')}` }
+            )
+
+            qb.andWhere(
+                `to_tsvector('simple', Task.searchText) @@ to_tsquery('simple', :query)`,
+                { query: `${filter.negativeKeywords.map(kw=>`! ${kw}`).join(' & ')}` }
+            )
         }
 
         if (args.page) {
-            findOpts.skip = (args.page - 1) * (args.perPage || 30);
+            qb.skip((args.page - 1) * (args.perPage || 30));
         }
 
         if (args.perPage) {
-            findOpts.take = args.perPage;
+            qb.take(args.perPage);
         }
 
-        let tasks = await this.rep.find(findOpts);
+        let tasks = await qb.getMany();
 
         return {
             tasks: tasks,
-            total: tasks.length
+            total: tasks.length,
+            page: args.page,
+            perPage: args.perPage || tasks.length
         }
     }
 }
