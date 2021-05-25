@@ -12,7 +12,8 @@ export class Tag {
 
     @Field(() => String)
     @Column({
-        type: "varchar"
+        type: "varchar",
+        unique: true
     })
     name!: string;
 }

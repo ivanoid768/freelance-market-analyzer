@@ -21,6 +21,7 @@ import { AdminResolver } from './admin.api';
 import { CategoryResolver } from './category.api';
 import { TagResolver } from './tag.resolver';
 import { FilterResolver } from './filter.resolver';
+import { TaskResolver } from './task.resolver';
 
 // registerEnumType(ProductSources, {
 // 	name: 'ProductSources', // this one is mandatory
@@ -32,7 +33,8 @@ const typeSchema = buildSchemaSync({
         AdminResolver,
         CategoryResolver,
         TagResolver,
-        FilterResolver
+        FilterResolver,
+        TaskResolver
     ],
     authChecker: customAuthChecker,
     dateScalarMode: 'timestamp',

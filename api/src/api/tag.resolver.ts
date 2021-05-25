@@ -1,10 +1,10 @@
-import { Resolver, Query, Authorized, Mutation, Arg, ObjectType, Field, Int, InputType, Args, } from "type-graphql";
+import { Resolver, Query, Authorized, Mutation, Arg, ObjectType, Field, Int, InputType, Args, ArgsType, } from "type-graphql";
 import { getRepository, Repository } from "typeorm";
 
 import { Tag } from "../entity/Tag";
 import { Role } from "./auth.api";
 
-@InputType()
+@ArgsType()
 class TagInput {
     @Field(() => String)
     name: string;
@@ -29,14 +29,17 @@ export class TagResolver {
 
     @Authorized(Role.UserRole.TRIAL)
     @Query(() => TagsResp)
-    async tags(@Arg('searchText', { nullable: true }) searchText: string) {
-        let tags = await this.rep.createQueryBuilder()
-            .select()
-            .where(
+    async tags(@Arg('searchText', { nullable: true }) searchText?: string) {
+        let qb = this.rep.createQueryBuilder() // .select()
+
+        if (searchText) {
+            qb.where(
                 `to_tsvector('simple', Tag.name) @@ to_tsquery('simple', :query)`,
                 { query: `${searchText}:*` }
             )
-            .getMany();
+        }
+
+        let tags = await qb.getMany();
 
         return {
             tags: tags,
@@ -57,11 +60,16 @@ export class TagResolver {
 
     @Authorized(Role.UserRole.TRIAL)
     @Mutation(() => Tag)
-    async deleteTag(@Arg('id') id: number) {
+    async deleteTag(@Arg('id', () => Int) id: number): Promise<Tag> {
         let tag = await this.rep.findOneOrFail(id);
+        
+        const tagId = tag.id;
 
-        tag = await this.rep.remove(tag);
+        await this.rep.remove(tag);
 
-        return tag;
+        return {
+            ...tag,
+            id: tagId
+        }
     }
 }

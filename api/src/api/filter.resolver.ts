@@ -1,12 +1,12 @@
 import { SourceCategory } from "shared/src/entity/SourceCategory";
-import { Resolver, Query, Authorized, Mutation, Arg, ObjectType, Field, Int, InputType, Args, Ctx, FieldResolver, Root } from "type-graphql";
+import { Resolver, Query, Authorized, Mutation, Arg, ObjectType, Field, Int, InputType, Args, Ctx, FieldResolver, Root, ArgsType } from "type-graphql";
 import { getRepository, In, Repository } from "typeorm";
 
 import { Filter } from "../entity/Filter";
 import { Role } from "./auth.api";
 import { IContext } from "./types.api";
 
-@InputType()
+@ArgsType()
 class FilterInput { // implements Partial<Filter>
     @Field(() => String, { nullable: true })
     name?: string;
@@ -40,7 +40,7 @@ export class FilterResolver {
 
     @Authorized(Role.UserRole.TRIAL)
     @Query(() => FiltersResp)
-    async tags(@Ctx() context: IContext) {
+    async filters(@Ctx() context: IContext) {
         let filters = await this.rep.find({ where: { user: context.user.id } });
 
         return {

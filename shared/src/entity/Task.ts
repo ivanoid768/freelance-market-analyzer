@@ -1,3 +1,4 @@
+import { Field, Float, ID, Int, ObjectType } from "type-graphql";
 import { Entity, Column, PrimaryGeneratedColumn, Index } from "typeorm";
 
 export enum PriceType {
@@ -18,7 +19,9 @@ export enum PaymentType {
 }
 
 @Entity()
+@ObjectType()
 export class Task {
+    @Field(() => ID)
     @PrimaryGeneratedColumn({
         type: 'integer'
     })
@@ -30,6 +33,7 @@ export class Task {
     })
     extId: string;
 
+    @Field(() => String)
     @Column({
         length: 100,
     })
@@ -46,6 +50,7 @@ export class Task {
     })
     categoryId: number;
 
+    @Field(() => String)
     @Index()
     @Column({
         type: 'varchar',
@@ -53,11 +58,13 @@ export class Task {
     })
     url: string;
 
+    @Field(() => String)
     @Column({
         length: 300,
     })
     name: string;
 
+    @Field(() => String)
     @Column({
         type: 'varchar',
         nullable: true,
@@ -83,6 +90,7 @@ export class Task {
     })
     searchText: string;
 
+    @Field(() => String)
     @Column({
         type: 'enum',
         enumName: 'PriceType',
@@ -91,12 +99,14 @@ export class Task {
     })
     priceType: string;
 
+    @Field(() => Float)
     @Column({
         type: 'float',
         nullable: true,
     })
     price: number;
 
+    @Field(() => Int)
     @Column({
         type: 'enum',
         nullable: true,
@@ -104,6 +114,7 @@ export class Task {
     })
     paymentType: number;
 
+    @Field(() => Int)
     @Column({
         type: 'enum',
         nullable: true,
@@ -111,12 +122,14 @@ export class Task {
     })
     difficultyLevel: number;
 
+    @Field(() => Int)
     @Column({
         type: 'int',
         nullable: true,
     })
     bidCount: number;
 
+    @Field(() => Float)
     @Column({
         type: 'int',
         nullable: true,
