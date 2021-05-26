@@ -8,13 +8,13 @@ import { Filter } from "src/entity/Filter";
 
 @ArgsType()
 class TasksArgs {
-    @Field(() => Int)
+    @Field(() => Int, { nullable: true })
     filterId?: number;
 
-    @Field(() => Int)
+    @Field(() => Int, { nullable: true })
     page?: number;
 
-    @Field(() => Int)
+    @Field(() => Int, { nullable: true })
     perPage?: number;
 }
 
@@ -49,7 +49,7 @@ export class TaskResolver {
         let qb = this.rep.createQueryBuilder();
 
         if (args.filterId) {
-            let filter = await this.filterRep.findOne({ where: { user: context.user.id, id: args.filterId } });
+            let filter = await this.filterRep.findOne({ where: { user: context.user.id, id: args.filterId }, relations: ['categories'] });
             if (!filter) {
                 throw new Error('invalid_filter_id');
             }
@@ -60,13 +60,8 @@ export class TaskResolver {
 
             qb.andWhere(
                 `to_tsvector('simple', Task.searchText) @@ to_tsquery('simple', :query)`,
-                { query: `${filter.positiveKeywords.join(' & ')}` }
-            )
-
-            qb.andWhere(
-                `to_tsvector('simple', Task.searchText) @@ to_tsquery('simple', :query)`,
-                { query: `${filter.negativeKeywords.map(kw=>`! ${kw}`).join(' & ')}` }
-            )
+                { query: `${filter.positiveKeywords.map(kw => `${kw}:*`).join(' & ')} & ${filter.negativeKeywords.map(kw => `! ${kw}:*`).join(' & ')}` }
+            ) //TODO: .map(kw => `${kw}:*`) - remove? Strict 'word' or suffix 'word' too?
         }
 
         if (args.page) {
@@ -77,12 +72,14 @@ export class TaskResolver {
             qb.take(args.perPage);
         }
 
+        // console.log(qb.getQueryAndParameters());
+
         let tasks = await qb.getMany();
 
         return {
             tasks: tasks,
             total: tasks.length,
-            page: args.page,
+            page: args.page || 1,
             perPage: args.perPage || tasks.length
         }
     }

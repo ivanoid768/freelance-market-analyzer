@@ -85,6 +85,7 @@ export class Task {
     })
     tags: string[];
 
+    // @Field(() => String)
     @Column({
         type: 'varchar',
     })
