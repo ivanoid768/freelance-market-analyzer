@@ -7,6 +7,12 @@ class Config {
     readonly RUN_MIGRATIONS = env.RUN_MIGRATIONS;
 
     readonly FLR_PAGE_COUNT = parseInt(env.FLR_PAGE_COUNT || '0') || 3;
+
+    readonly REDIS_HOST = env.REDIS_HOST;
+    readonly REDIS_PORT = parseInt(env.REDIS_PORT || '0');
+
+    readonly RUN_CATEGORY_WORKER = env.RUN_CATEGORY_WORKER === '1' ? true : false;
+    readonly RUN_TASK_WORKER = env.RUN_TASK_WORKER === '1' ? true : false;
 }
 
 export const config = new Config()

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "bullmq": "^1.28.0",
     "cheerio": "^1.0.0-rc.5",
     "dotenv": "^8.2.0",
     "node-cron": "^3.0.0",
