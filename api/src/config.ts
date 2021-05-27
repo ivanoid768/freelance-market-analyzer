@@ -13,8 +13,8 @@ class Config {
 
     readonly RUN_CATEGORY_JOBS = env.RUN_CATEGORY_JOBS === '1' ? true : false;
     readonly RUN_TASK_JOBS = env.RUN_TASK_JOBS === '1' ? true : false;
-    readonly RUN_CATEGORY_CRON = env.RUN_CATEGORY_CRON || '* * * * *';
-    readonly RUN_TASK_CRON = env.RUN_TASK_CRON || '* * * * *';
+    readonly RUN_CATEGORY_CRON = env.RUN_CATEGORY_CRON || '0 0 * * 0';
+    readonly RUN_TASK_CRON = env.RUN_TASK_CRON || '0 * * * *';
 }
 
 export const config = new Config()

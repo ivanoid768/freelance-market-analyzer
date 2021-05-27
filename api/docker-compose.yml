@@ -11,6 +11,20 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 7e39a446Q47dN4PN
 
+  redis:
+    # Настройка редис
+    # https://github.com/docker-library/redis/issues/55
+    # https://github.com/docker-library/redis/issues/35
+    container_name: fma-redis
+    image: redis:5.0-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      # - redis_db_data:/data
+      - ./dockerconfig/redis/:/usr/local/etc/redis/
+    command: redis-server /usr/local/etc/redis/redis.conf
+
   api:
     container_name: fma-api
     build:

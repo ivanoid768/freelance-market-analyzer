@@ -4,7 +4,7 @@
   "main": "./src/index.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon -r dotenv/config ./src/index.ts",
+    "start": "nodemon -r dotenv/config -r tsconfig-paths/register ./src/index.ts",
     "script": "ts-node -r dotenv/config -r tsconfig-paths/register",
     "build": "tsc"
   },

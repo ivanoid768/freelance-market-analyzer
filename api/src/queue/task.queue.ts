@@ -25,4 +25,6 @@ export async function addTaskJob() {
     if (jobCategoriesIds.length > 0) {
         await taskQueue.add(`${jobCategoriesIds[0]}`, { categoryIds: jobCategoriesIds });
     }
+
+    console.info(`Task jobs added. Jobs count:`, await taskQueue.getJobCounts());
 }

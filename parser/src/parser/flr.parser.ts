@@ -69,13 +69,14 @@ export async function getAndSaveCategories() {
         .execute();
 
     // console.log(insertedCategories.generatedMaps.slice(0, 10));
+    console.info(`Flr categories updated. Count: ${insertedCategories.generatedMaps.length}`);
 }
 
 export async function getAndSaveTasks(categoryIds: number[]) {
     const page_count = config.FLR_PAGE_COUNT;
 
     const categoryRepository = getRepository(SourceCategory);
-    const categories = await categoryRepository.findByIds(categoryIds, {select: ["id", "extId"]});
+    const categories = await categoryRepository.findByIds(categoryIds, { select: ["id", "extId"] });
 
     const taskRepository = getRepository(Task);
 
@@ -83,10 +84,10 @@ export async function getAndSaveTasks(categoryIds: number[]) {
         for (let pageIdx = 1; pageIdx <= page_count; pageIdx++) {
             let parsedTasks = await flrAPI.getTasks([category.extId], pageIdx);
 
-            if(!parsedTasks.length){
+            if (!parsedTasks.length) {
                 break;
             }
-            
+
             let taskToInsert = parsedTasks.map(parsedTask => {
                 let task = new Task();
                 task.sourceId = sourceId;
@@ -108,7 +109,7 @@ export async function getAndSaveTasks(categoryIds: number[]) {
 
                 return task;
             })
-            
+
             let insertedTasks = await taskRepository.createQueryBuilder()
                 .insert()
                 .into(Task)
@@ -125,6 +126,7 @@ export async function getAndSaveTasks(categoryIds: number[]) {
                 .execute();
 
             // console.log(insertedTasks.generatedMaps[0], insertedTasks.generatedMaps.length);
+            console.info(`Flr tasks updated. Count: ${insertedTasks.generatedMaps.length}`);
         }
     }
 }

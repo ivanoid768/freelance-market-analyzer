@@ -6,5 +6,7 @@ import { FLR_CATEGORY_QUEUE } from "shared/src/queue";
 const categoryQueue = new Queue(FLR_CATEGORY_QUEUE, { connection: queueConnection });
 
 export async function addCategoryJobs() {
-    await categoryQueue.add('category_job', null);
+    let job = await categoryQueue.add('category_job', null);
+    
+    console.info(`Category job added`, job.name, job.data);
 }
