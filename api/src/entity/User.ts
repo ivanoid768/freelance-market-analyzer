@@ -38,6 +38,12 @@ export class User {
     })
     token?: string;
 
+    @Field(() => String)
+    @Column({
+        type: 'varchar' //TODO: validate email.
+    })
+    email: string;
+
     @OneToMany(() => Filter, filter => filter.user)
     filters: Filter[];
 }

@@ -136,4 +136,10 @@ export class Task {
         nullable: true,
     })
     customerRating: number;
+
+    @Column({
+        type: 'timestamp',
+        default: Date.now()
+    })
+    created: number;
 }
