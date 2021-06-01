@@ -24,8 +24,8 @@ export class Filter {
         type: 'varchar',
         nullable: true,
         transformer: {
-            to: (value: string[]) => value.join(','),
-            from: (value: string) => value.split(',')
+            to: (value: string[]) => value && value.join(','),
+            from: (value: string) => value && value.split(',')
         }
     })
     positiveKeywords: string[];
@@ -35,8 +35,8 @@ export class Filter {
         type: 'varchar',
         nullable: true,
         transformer: {
-            to: (value: string[]) => value.join(','),
-            from: (value: string) => value.split(',')
+            to: (value: string[]) => value && value.join(','),
+            from: (value: string) => value && value.split(',')
         }
     })
     negativeKeywords: string[];

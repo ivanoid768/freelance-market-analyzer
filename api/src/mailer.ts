@@ -38,7 +38,7 @@ class Mailer {
         this.mailer = mailer;
     }
 
-    public sendNewTasks(mailData: IMailData) {
+    public async sendNewTasks(mailData: IMailData) {
         let text = `Hi, ${mailData.email}\n\n`;
 
         for (const filter of mailData.filters) {
@@ -50,14 +50,16 @@ class Mailer {
 
             text += '\n';
         }
-
-        this.mailer.sendMail({
+        console.log(text);
+        
+        await this.mailer.sendMail({
             to: mailData.email,
             subject: 'New jobs for you!',
             text: text
-        }).catch(e => {
-            console.error(`sendNewTasks error: ${e.message}`, mailData);
         })
+        // .catch(e => {
+        //     console.error(`sendNewTasks error: ${e.message}`, mailData);
+        // })
     }
 }
 

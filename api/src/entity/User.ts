@@ -40,7 +40,8 @@ export class User {
 
     @Field(() => String)
     @Column({
-        type: 'varchar' //TODO: validate email.
+        type: 'varchar', //TODO: validate email. unique!
+        default: 'username@mail.com' 
     })
     email: string;
 

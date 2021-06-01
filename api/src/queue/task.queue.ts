@@ -50,23 +50,25 @@ async function getTasksByFilter(filter: Filter, taskRep: Repository<Task>, fromD
         { query: `${filter.positiveKeywords.map(kw => `${kw}:*`).join(' & ')} & ${filter.negativeKeywords.map(kw => `! ${kw}:*`).join(' & ')}` }
     )
 
-    qb.andWhere(`Task.created <= :fromDate`, { fromDate: fromDate.getTime() });
+    // qb.andWhere(`Task.created <= :fromDate`, { fromDate: fromDate.toISOString() }); //TODO: Figure out how to use js and pg timestamps together!!!
 
     let tasks = await qb.getMany();
 
     return tasks;
 }
 
-async function notifyUsersNewJobsByEmail() {
+export async function notifyUsersNewJobsByEmail(addTaskStart: Date) {
     let userRep = getRepository(User);
     let taskRep = getRepository(Task);
 
-    let users = await userRep.find({ relations: ['filters'] }); //TODO: streams or chank by chank reading.
+    let users = await userRep.find({ relations: ['filters', 'filters.categories'] }); //TODO: streams or chank by chank reading.
 
     for (const user of users) {
-        let mailData: IMailData;
-        mailData.email = user.email;
-        mailData.name = user.email;
+        let mailData: IMailData = {
+            email: user.email,
+            name: user.email,
+            filters: []
+        };
 
         for (const filter of user.filters) {
             let mailFilter = {
@@ -85,6 +87,8 @@ async function notifyUsersNewJobsByEmail() {
             mailData.filters.push(mailFilter);
         }
 
+        console.log('mailData', mailData);
+
         mailer.sendNewTasks(mailData);
     }
 }
@@ -95,5 +99,5 @@ taskQueueEvents.on('drained', async (id) => {
         return; //TODO: wait for all active tasks complete or failed.
     }
 
-    await notifyUsersNewJobsByEmail();
+    await notifyUsersNewJobsByEmail(addTaskStart);
 })
