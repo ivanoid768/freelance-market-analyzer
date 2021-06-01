@@ -6,7 +6,7 @@ import { PaymentType, PriceType, Task } from "shared/src/entity/Task";
 import { config } from "src/config";
 
 const sourceId: number = 1;
-const sourceName: string = 'freelancer';
+const sourceName: string = config.SOURCE_01_BASE_URL.match(/\.([^.]+)\./i)[1];
 
 interface ISubCategory extends SourceCategory {
     root: string;
