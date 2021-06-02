@@ -50,8 +50,10 @@ async function getTasksByFilter(filter: Filter, taskRep: Repository<Task>, fromD
         { query: `${filter.positiveKeywords.map(kw => `${kw}:*`).join(' & ')} & ${filter.negativeKeywords.map(kw => `! ${kw}:*`).join(' & ')}` }
     )
 
-    // qb.andWhere(`Task.created <= :fromDate`, { fromDate: fromDate.toISOString() }); //TODO: Figure out how to use js and pg timestamps together!!!
+    qb.andWhere(`Task.created > to_timestamp(:fromDate)`, { fromDate: Math.floor(fromDate.getTime() / 1000) }); //TODO: timestamptz be better?
 
+    // console.log(qb.getQueryAndParameters());
+    
     let tasks = await qb.getMany();
 
     return tasks;
@@ -84,12 +86,14 @@ export async function notifyUsersNewJobsByEmail(addTaskStart: Date) {
                 }
             });
 
-            mailData.filters.push(mailFilter);
+            if(mailFilter.tasks.length > 0){
+                mailData.filters.push(mailFilter);
+            }
         }
 
-        console.log('mailData', mailData);
-
-        mailer.sendNewTasks(mailData);
+        if(mailData.filters.length > 0){
+            mailer.sendNewTasks(mailData);
+        }
     }
 }
 

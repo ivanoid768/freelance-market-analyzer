@@ -139,11 +139,7 @@ export class Task {
 
     @Column({
         type: 'timestamp',
-        default: new Date().toISOString(),
-        transformer: {
-            to: (val: number) => new Date(val).toISOString(),
-            from: (val: string) => new Date(val).getTime()
-        }
+        default: new Date()
     })
-    created: number;
+    created: Date;
 }

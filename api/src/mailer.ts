@@ -28,7 +28,6 @@ const defaultsMailOpts: SMTPTransport.Options = {
     from: config.MAILER_FROM,
 };
 
-// create reusable transporter object using the default SMTP transport
 const mailerLib = nodemailer.createTransport(newTransport, defaultsMailOpts);
 
 class Mailer {
@@ -38,28 +37,34 @@ class Mailer {
         this.mailer = mailer;
     }
 
-    public async sendNewTasks(mailData: IMailData) {
+    public sendNewTasks(mailData: IMailData) {
         let text = `Hi, ${mailData.email}\n\n`;
+        let html = `<h2>Hi, ${mailData.email}</h2>`
 
         for (const filter of mailData.filters) {
             text += `Filter name: ${filter.name}\n`;
+            html += `<h3>Filter name: ${filter.name}</h3>`;
 
+            let i = 1;
             for (const task of filter.tasks) {
-                text += `<a href="${task.url}" > ${task.name} </a>\n`
+                text += `${i}) ${task.name} - ${task.url}\n`
+                html += `<span> ${i} </span> <a href="${task.url}" > ${task.name} </a><br>`
+
+                i++;
             }
 
             text += '\n';
+            html += '<br>'
         }
-        console.log(text);
-        
-        await this.mailer.sendMail({
+
+        this.mailer.sendMail({
             to: mailData.email,
             subject: 'New jobs for you!',
-            text: text
+            text: text,
+            html: html
+        }).catch(e => {
+            console.error(`sendNewTasks error: ${e.message}`, mailData);
         })
-        // .catch(e => {
-        //     console.error(`sendNewTasks error: ${e.message}`, mailData);
-        // })
     }
 }
 
