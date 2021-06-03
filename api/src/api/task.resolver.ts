@@ -1,10 +1,11 @@
-import { Resolver, Query, Authorized, Mutation, Arg, ObjectType, Field, Int, InputType, Args, Ctx, FieldResolver, Root, ArgsType } from "type-graphql";
+import { Resolver, Query, Authorized, Mutation, Arg, ObjectType, Field, Int, InputType, Args, Ctx, FieldResolver, Root, ArgsType, Subscription } from "type-graphql";
 import { FindManyOptions, getRepository, ILike, In, Not, Repository } from "typeorm";
 
 import { Task } from "shared/src/entity/Task";
 import { Role } from "./auth.api";
 import { IContext } from "./types.api";
 import { Filter } from "src/entity/Filter";
+import { INewTasksPayload, SUB_NOTIFY_NEW_TASKS } from "src/types.index";
 
 @ArgsType()
 class TasksArgs {
@@ -31,6 +32,21 @@ class TasksResp {
 
     @Field(() => Int)
     perPage?: number;
+}
+
+@ObjectType()
+class Notification {
+    @Field(() => [Task])
+    tasks: Task[];
+
+    @Field(() => Int)
+    total: number;
+}
+
+@ArgsType()
+class NewTasksNotificationArgs {
+    @Field(() => Int)
+    filterId!: number;
 }
 
 @Resolver()
@@ -83,4 +99,45 @@ export class TaskResolver {
             perPage: args.perPage || tasks.length
         }
     }
+
+    @Authorized(Role.UserRole.TRIAL)
+    @Subscription({
+        topics: SUB_NOTIFY_NEW_TASKS,
+        filter: ({ payload, args, context }: { payload: INewTasksPayload, args: NewTasksNotificationArgs, context: IContext }) => {
+            return payload.userId == context.user.id && payload.filterId == args.filterId;
+        },
+    })
+    newTasksNotification(
+        @Root() notificationPayload: INewTasksPayload,
+        @Args() args: NewTasksNotificationArgs,
+        @Ctx() context: IContext
+    ): Notification {
+
+        return {
+            tasks: notificationPayload.tasks,
+            total: notificationPayload.tasks.length
+        }
+    }
+
+    // @Query(() => String)
+    // async subTest() {
+    //     let addTaskStart = new Date();
+    //     let created = addTaskStart.getTime() + 1000;
+    //     let createdDate = new Date(created)
+    //     console.log(addTaskStart.getTime(), addTaskStart.toLocaleTimeString());
+    //     console.log(created, createdDate.toLocaleTimeString());
+
+    //     let updRes = await getRepository(Task).update({}, { created: createdDate });
+    //     console.log("updRes", updRes);
+
+    //     let userEmail = config.MAILER_USER;
+    //     let user = await getRepository(User).findOne();
+    //     user.email = userEmail;
+    //     await getRepository(User).save(user);
+    //     console.log("user", user);
+
+    //     await notifyUsersNewJobsByEmail(addTaskStart)
+
+    //     return 'subTest';
+    // }
 }

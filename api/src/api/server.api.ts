@@ -9,6 +9,7 @@ import {
     makeExecutableSchema,
     SchemaDirectiveVisitor,
 } from 'apollo-server-express';
+import { createServer } from "http";
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
 import { buildSchemaSync, registerEnumType } from 'type-graphql';
@@ -22,6 +23,7 @@ import { CategoryResolver } from './category.api';
 import { TagResolver } from './tag.resolver';
 import { FilterResolver } from './filter.resolver';
 import { TaskResolver } from './task.resolver';
+import { publisher } from 'src/queue/task.queue';
 
 // registerEnumType(ProductSources, {
 // 	name: 'ProductSources', // this one is mandatory
@@ -38,6 +40,7 @@ const typeSchema = buildSchemaSync({
     ],
     authChecker: customAuthChecker,
     dateScalarMode: 'timestamp',
+    pubSub: publisher,
 });
 
 SchemaDirectiveVisitor.visitSchemaDirectives(typeSchema, {
@@ -81,8 +84,12 @@ SchemaDirectiveVisitor.visitSchemaDirectives(typeSchema, {
 export const createApolloGraphQLServer = (forTest = false) => {
     return new ApolloServer({
         schema: typeSchema,
-        context: async ({ req }) => {
-            const token = req.headers.authorization;
+        context: async ({ req, connection }) => {
+            let token = req && req.headers.authorization;
+
+            if (!token && connection) {
+                token = connection.context.token;
+            }
 
             if (token) {
                 const users = await getRepository(User).find({ where: { token: token } });
@@ -98,7 +105,14 @@ export const createApolloGraphQLServer = (forTest = false) => {
 
             return {};
         },
-        playground: forTest ? undefined : { tabs: [{ endpoint: '/graphql' }] },
+        subscriptions: {
+            path: '/subscriptions',
+            onConnect: async (connectionParams: { Authorization: string }) => {
+                // console.log(connectionParams.Authorization);
+                return { token: connectionParams.Authorization }
+            },
+        },
+        playground: forTest ? undefined : { tabs: [{ endpoint: '/graphql' }], subscriptionEndpoint: '/subscriptions' },
     });
 };
 
@@ -115,7 +129,13 @@ export const startServer = () => {
 
     server.applyMiddleware({ app, path: '/', cors: corsOptions });
 
-    app.listen(4000, () => {
-        console.log(`Server ready at http://localhost:4000${server.graphqlPath}`);
+    const httpServer = createServer(app);
+    server.installSubscriptionHandlers(httpServer)
+
+    let PORT = 4000;
+
+    httpServer.listen(PORT, () => {
+        console.log(`Server ready at http://localhost:${PORT}${server.graphqlPath}`);
+        console.log(`Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`);
     });
 };

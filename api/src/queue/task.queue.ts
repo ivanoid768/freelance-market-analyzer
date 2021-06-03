@@ -1,4 +1,5 @@
 import { Queue, QueueEvents } from "bullmq";
+import { PubSub } from "apollo-server-express";
 
 import { queueConnection } from "./index.queue";
 import { FLR_TASK_QUEUE, FlrTaskJob } from "shared/src/queue";
@@ -8,8 +9,10 @@ import { User } from "src/entity/User";
 import { Task } from "shared/src/entity/Task";
 import { IMailData, mailer } from "src/mailer";
 import { Filter } from "src/entity/Filter";
+import { SUB_NOTIFY_NEW_TASKS, INewTasksPayload } from "src/types.index";
 
 let addTaskStart: Date;
+export const publisher = new PubSub();
 
 const taskQueue = new Queue<FlrTaskJob>(FLR_TASK_QUEUE, { connection: queueConnection });
 const taskQueueEvents = new QueueEvents(FLR_TASK_QUEUE);
@@ -53,7 +56,7 @@ async function getTasksByFilter(filter: Filter, taskRep: Repository<Task>, fromD
     qb.andWhere(`Task.created > to_timestamp(:fromDate)`, { fromDate: Math.floor(fromDate.getTime() / 1000) }); //TODO: timestamptz be better?
 
     // console.log(qb.getQueryAndParameters());
-    
+
     let tasks = await qb.getMany();
 
     return tasks;
@@ -86,12 +89,22 @@ export async function notifyUsersNewJobsByEmail(addTaskStart: Date) {
                 }
             });
 
-            if(mailFilter.tasks.length > 0){
+            if (tasks.length > 0) {
+                let payload: INewTasksPayload = {
+                    filterId: filter.id,
+                    userId: user.id,
+                    tasks: tasks
+                }
+
+                publisher.publish(SUB_NOTIFY_NEW_TASKS, payload);
+            }
+
+            if (mailFilter.tasks.length > 0) {
                 mailData.filters.push(mailFilter);
             }
         }
 
-        if(mailData.filters.length > 0){
+        if (mailData.filters.length > 0) {
             mailer.sendNewTasks(mailData);
         }
     }
@@ -105,3 +118,7 @@ taskQueueEvents.on('drained', async (id) => {
 
     await notifyUsersNewJobsByEmail(addTaskStart);
 })
+
+function INewTasksPayload(SUB_NOTIFY_NEW_TASKS: string, INewTasksPayload: any) {
+    throw new Error("Function not implemented.");
+}
