@@ -2,6 +2,7 @@ import { env } from 'process'
 
 class Config {
     readonly POSTGRES_DB_CONNECT_URI = env.POSTGRES_DB_CONNECT_URI;
+    readonly ELASTICSEARCH_DB_CONNECT_URI = env.ELASTICSEARCH_DB_CONNECT_URI;
 
     readonly REDIS_HOST = env.REDIS_HOST;
     readonly REDIS_PORT = parseInt(env.REDIS_PORT || '0');

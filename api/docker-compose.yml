@@ -3,13 +3,13 @@ version: '3.5'
 services:
   postgres:
     container_name: fma-postgres
-    image: mongo:4.4
+    image: postgres
     restart: always
     ports:
-      - 27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 7e39a446Q47dN4PN
+      # - 27017
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: 7e39a446Q47dN4PN
 
   redis:
     # Настройка редис
@@ -24,6 +24,16 @@ services:
       # - redis_db_data:/data
       - ./dockerconfig/redis/:/usr/local/etc/redis/
     command: redis-server /usr/local/etc/redis/redis.conf
+  
+  elasticsearch:
+    container_name: my-local-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
+    restart: always
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment: 
+      discovery.type: single-node
 
   api:
     container_name: fma-api
